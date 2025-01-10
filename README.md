@@ -31,4 +31,4 @@ You can clone this project to your local machine and run it in your local enviro
 1. Clone this project from GitHub:
 
    ```bash
-   git clone https://github.com/Asliikl
+   git clone origin https://github.com/Asliikl/Health-Tracker.git

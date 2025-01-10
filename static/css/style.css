@@ -1,0 +1,189 @@
+
+body {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+.card-body {
+    height: 100%;
+}
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.table th, .table td {
+    text-align: center;
+}
+.table .red {
+    background-color: #f8d7da; 
+}
+.table .green {
+    background-color: #d4edda; 
+}
+.goal-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem !important;
+}
+.goal-card .card-body {
+    padding: 0.4rem;
+    height: auto;
+}
+.goal-card .card-title {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.goal-card .card-title span {
+    font-size: 0.7rem;
+}
+.goal-card p {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+.goal-progress-bar {
+    height: 12px;
+    margin-bottom: 0.25rem;
+    border-radius: 4px;
+    position: relative;
+    background: rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+.progress-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 0.65rem;
+    line-height: 12px;
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    z-index: 1;
+}
+.goal-card small {
+    font-size: 0.7rem;
+}
+.goal-card .d-flex {
+    margin-bottom: 0.15rem !important;
+}
+.goal-card .progress-bar {
+    transition: width 1s ease-in-out;
+    position: relative;
+}
+.goal-card .progress-bar.incomplete {
+    background-color: #6c757d;
+}
+.goal-card .progress-bar.complete {
+    background-color: #28a745;
+}
+.goal-card .progress-bar.exceeded {
+    background-color: #dc3545;
+}
+.goal-card.incomplete {
+    border-left: 4px solid #6c757d;
+}
+.goal-card.complete {
+    border-left: 4px solid #28a745;
+}
+.goal-card.exceeded {
+    border-left: 4px solid #dc3545;
+}
+.motivation-text {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+.compact-text {
+    display: none;
+}
+.activity-icon {
+    font-size: 0.9rem;
+    width: 20px;
+    text-align: center;
+    margin-right: 5px;
+}
+.entry-date {
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-left: 8px;
+}
+.entry-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.table td {
+    padding: 0.3rem 0.5rem;
+}
+.quick-add-card {
+    position: relative;
+    overflow: hidden;
+}
+.quick-add-card::before {
+    content: '+';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.quick-add-card:hover::before {
+    opacity: 1;
+}
+.page-header {
+    background: linear-gradient(135deg, #4B79A1 0%, #283E51 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0.8rem;
+}
+.page-header h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+}
+.page-header .lead {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    opacity: 0.9;
+}
+.motivation-card {
+    background: linear-gradient(135deg, #FF9D6C 0%, #FF6B6B 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+.achievement-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin: 0.2rem;
+    background: rgba(255,255,255,0.15);
+}
+.water-icon {
+    color: #0d6efd;
+    font-size: 1.8rem;
+    margin-right: 1rem;
+}
+.quick-add-card {
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.quick-add-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}

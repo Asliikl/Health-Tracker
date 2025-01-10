@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Your Goals</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .goal-card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #ffffff, #f5f5f5);
+            height: 100%;
+        }
+        .goal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .goal-icon {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .water-icon { color: #0d6efd; }
+        .meal-icon { color: #198754; }
+        .activity-icon { color: #dc3545; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="text-center mb-4">
+                    <h2 class="mb-3">Set Your Daily Goals</h2>
+                    <p class="text-muted">Update your goals for a healthier lifestyle</p>
+                </div>
+
+                <form action="{{ url_for('set_goal') }}" method="POST">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="card goal-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tint goal-icon water-icon"></i>
+                                    <h5 class="card-title mb-3">Water Goal</h5>
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="water_goal" 
+                                               name="water_goal" 
+                                               required 
+                                               min="0" 
+                                               step="0.1"
+                                               value="{{ goal[1] if goal else '' }}"
+                                               placeholder="Water goal">
+                                        <label for="water_goal">Daily Water Goal (liters)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card goal-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-utensils goal-icon meal-icon"></i>
+                                    <h5 class="card-title mb-3">Calorie Goal</h5>
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="meal_goal" 
+                                               name="meal_goal" 
+                                               required 
+                                               min="0"
+                                               value="{{ goal[2] if goal else '' }}"
+                                               placeholder="Calorie goal">
+                                        <label for="meal_goal">Daily Calorie Goal</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card goal-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-running goal-icon activity-icon"></i>
+                                    <h5 class="card-title mb-3">Activity Goal</h5>
+                                    <div class="form-floating">
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="activity_goal" 
+                                               name="activity_goal" 
+                                               required 
+                                               min="0"
+                                               value="{{ goal[3] if goal else '' }}"
+                                               placeholder="Activity goal">
+                                        <label for="activity_goal">Calories to Burn</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Save Goals</button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Back to Tracking</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

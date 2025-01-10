@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head>
+    
+<body>
+
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4">Health Tracker</h1>
+                    <p class="lead">Track your daily health goals and stay motivated!</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if goal %}
+                        <div class="achievement-badge">
+                            <i class="fas fa-trophy"></i> {{ goal_status['streak_days'] }} Day Streak
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if goal %}
+    <div class="container-fluid">
+        <div class="motivation-card">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <i class="fas fa-chart-line fa-2x"></i>
+                </div>
+                <div class="col">
+                    <h5 class="mb-0">Daily Progress</h5>
+                    <p class="mb-0">
+                        {% set total_percentage = (goal_status['water_percentage'] + goal_status['meal_percentage'] + goal_status['activity_percentage']) / 3 %}
+                        {% if total_percentage < 50 %}
+                            "Every small step counts! Keep going! 💪"
+                        {% elif total_percentage < 80 %}
+                            "Great progress! Keep it up! 🌟"
+                        {% else %}
+                            "You're almost there! You're doing amazing! 🎯"
+                        {% endif %}
+                    </p>                    
+                </div>
+                <div class="col-auto">
+                    <div class="h2 mb-0">{{ "%.0f"|format(total_percentage) }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="container-fluid mt-4 ">
+        <div class="row">
+            <!-- Hedefler -->
+            <div class="col-md-4 px-4">
+                <h4 class="h5 mb-2">Current Goals</h4>
+                <p class="motivation-text">
+                    {% if goal %}
+                            {% set total_percentage = (goal_status['water_percentage'] + goal_status['meal_percentage'] + goal_status['activity_percentage']) / 3 %}
+                            {% if total_percentage < 50 %}
+                                "Every small step counts! Keep pushing! 💪"
+                            {% elif total_percentage < 80 %}
+                                "You're making great progress! Keep going! 🌟"
+                            {% else %}
+                                "Almost there! You're doing amazing! 🎯"
+                            {% endif %}
+                        {% else %}
+                        "Set your goals and start your journey! 🎯"
+                     {% endif %}
+                </p>
+                <a href="{{ url_for('set_goal') }}" class="btn btn-success btn-sm mb-3 w-100">Set Your Goals</a>
+
+                {% if goal %}
+                    <div class="card goal-card mb-2 {% if goal_status['water_percentage'] < 100 %}incomplete{% elif goal_status['water_percentage'] == 100 %}complete{% else %}exceeded{% endif %}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Water Goal 
+                                {% if goal_status['water_percentage'] >= 100 %}
+                                    <span>🎉</span>
+                                {% endif %}
+                            </h5>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Target:</small>
+                                <small class="text-muted">{{ goal[1] }} liters</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="{% if goal_status['water_percentage'] > 100 %}text-danger{% elif goal_status['water_percentage'] == 100 %}text-success{% else %}text-muted{% endif %}">
+                                    Achieved:
+                                </small>
+                                <small class="{% if goal_status['water_percentage'] > 100 %}text-danger{% elif goal_status['water_percentage'] == 100 %}text-success{% else %}text-muted{% endif %}">
+                                    {{ "%.1f"|format(goal_status['water_total']|float) }} liters
+                                </small>
+                            </div>
+                            <div class="progress goal-progress-bar">
+                                <div class="progress-text">{{ goal_status['water_percentage']|round|int }}%</div>
+                                <div class="progress-bar {% if goal_status['water_percentage'] < 100 %}incomplete{% elif goal_status['water_percentage'] == 100 %}complete{% else %}exceeded{% endif %}" 
+                                     style="width: {{ goal_status['water_percentage'] }}%;" 
+                                     aria-valuenow="{{ goal_status['water_percentage'] }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <p class="compact-text">{{ goal_status['water_percentage']|round|int }}% Complete</p>
+                        </div>
+                    </div>
+
+                    <div class="card goal-card mb-2 {% if goal_status['meal_percentage'] < 100 %}incomplete{% elif goal_status['meal_percentage'] == 100 %}complete{% else %}exceeded{% endif %}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Meal Goal
+                                {% if goal_status['meal_percentage'] >= 100 %}
+                                    <span>🎯</span>
+                                {% endif %}
+                            </h5>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Target:</small>
+                                <small class="text-muted">{{ goal[2] }} calories</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="{% if goal_status['meal_percentage'] > 100 %}text-danger{% elif goal_status['meal_percentage'] == 100 %}text-success{% else %}text-muted{% endif %}">
+                                    Consumed:
+                                </small>
+                                <small class="{% if goal_status['meal_percentage'] > 100 %}text-danger{% elif goal_status['meal_percentage'] == 100 %}text-success{% else %}text-muted{% endif %}">
+                                    {{ goal_status['meal_total'] }} calories
+                                </small>
+                            </div>
+                            <div class="progress goal-progress-bar">
+                                <div class="progress-text">{{ goal_status['meal_percentage']|round|int }}%</div>
+                                <div class="progress-bar {% if goal_status['meal_percentage'] < 100 %}incomplete{% elif goal_status['meal_percentage'] == 100 %}complete{% else %}exceeded{% endif %}" 
+                                     style="width: {{ goal_status['meal_percentage'] }}%;" 
+                                     aria-valuenow="{{ goal_status['meal_percentage'] }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <p class="compact-text">{{ goal_status['meal_percentage']|round|int }}% Complete</p>
+                        </div>
+                    </div>
+
+                    <div class="card goal-card mb-2 {% if goal_status['activity_percentage'] < 100 %}incomplete{% elif goal_status['activity_percentage'] == 100 %}complete{% else %}exceeded{% endif %}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Activity Goal
+                                {% if goal_status['activity_percentage'] >= 100 %}
+                                    <span>💪</span>
+                                {% endif %}
+                            </h5>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Target:</small>
+                                <small class="text-muted">{{ goal[3] }} calories</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="{% if goal_status['activity_percentage'] > 100 %}text-success{% elif goal_status['activity_percentage'] == 100 %}text-success{% else %}text-muted{% endif %}">
+                                    Burned:
+                                </small>
+                                <small class="{% if goal_status['activity_percentage'] > 100 %}text-success{% elif goal_status['activity_percentage'] == 100 %}text-success{% else %}text-muted{% endif %}">
+                                    {{ goal_status['activity_total'] }} calories
+                                </small>
+                            </div>
+                            <div class="progress goal-progress-bar">
+                                <div class="progress-text">{{ goal_status['activity_percentage']|round|int }}%</div>
+                                <div class="progress-bar {% if goal_status['activity_percentage'] < 100 %}incomplete{% elif goal_status['activity_percentage'] == 100 %}complete{% else %}exceeded{% endif %}" 
+                                     style="width: {{ goal_status['activity_percentage'] }}%;" 
+                                     aria-valuenow="{{ goal_status['activity_percentage'] }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <p class="compact-text">{{ goal_status['activity_percentage']|round|int }}% Complete</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No goals set yet.</div>
+                {% endif %}
+            </div>
+
+            <!-- Ekleme Kartı -->
+            <div class="col-md-4 px-4">
+                <h4 class="h5 mb-3">Quick Add</h4>
+                <div class="card quick-add-card mb-3" data-bs-toggle="modal" data-bs-target="#waterModal">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="water-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">Drink Water</h5>
+                            <p class="card-text text-muted mb-0">Track your daily water intake</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card text-white bg-success mb-3" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#mealsModal">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-utensils"></i> Meals</h5>
+                        <p class="card-text mb-0">Track your meals</p>
+                </div>
+            </div>
+
+                <div class="card text-white bg-warning" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#activitiesModal">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-running"></i> Activities</h5>
+                        <p class="card-text mb-0">Track your activities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!--Günlük Veriler -->
+            <div class="col-md-4 px-4">
+                <h4 class="h5 mb-3">Daily Records</h4>
+                <div class="accordion accordion-flush" id="trackerAccordion">
+                    <!-- Su Takibi -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button p-2" type="button" data-bs-toggle="collapse" data-bs-target="#waterCollapse">
+                                <i class="fas fa-tint me-2"></i> Water Records
+                            </button>
+                        </h2>
+                        <div id="waterCollapse" class="accordion-collapse collapse show" data-bs-parent="#trackerAccordion">
+                            <div class="accordion-body p-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data %}
+                                                {% if entry[2] == 'Water' %}
+                                                    <tr class="{% if goal_status['water_percentage'] < 100 %}text-muted{% elif goal_status['water_percentage'] == 100 %}text-success{% else %}text-danger{% endif %}">
+                                                        <td>
+                                                            <div class="entry-content">
+                                                                <span>{{ entry[3] }}</span>
+                                                                <span class="entry-date">{{ entry[1] }}</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yemek Takibi -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#mealCollapse">
+                                <i class="fas fa-utensils me-2"></i> Meal Records
+                            </button>
+                        </h2>
+                        <div id="mealCollapse" class="accordion-collapse collapse" data-bs-parent="#trackerAccordion">
+                            <div class="accordion-body p-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data %}
+                                                {% if entry[2] == 'Meal' %}
+                                                    <tr class="{% if goal_status['meal_percentage'] < 100 %}text-muted{% elif goal_status['meal_percentage'] == 100 %}text-success{% else %}text-danger{% endif %}">
+                                                        <td>
+                                                            <div class="entry-content">
+                                                                <span>{{ entry[3] }}</span>
+                                                                <span class="entry-date">{{ entry[1] }}</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aktivite Takibi -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#activityCollapse">
+                                <i class="fas fa-running me-2"></i> Activity Records
+                            </button>
+                        </h2>
+                        <div id="activityCollapse" class="accordion-collapse collapse" data-bs-parent="#trackerAccordion">
+                            <div class="accordion-body p-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in data %}
+                                                {% if entry[2] == 'Activity' %}
+                                                    <tr class="{% if goal_status['activity_percentage'] < 100 %}text-muted{% elif goal_status['activity_percentage'] == 100 %}text-success{% else %}text-danger{% endif %}">
+                                                        <td>
+                                                            <div class="entry-content">
+                                                                <span>
+                                                                    {% set activity_info = entry[3].split(' (') %}
+                                                                    {% set activity_type = activity_info[0] %}
+                                                                    <span class="activity-icon">
+                                                                        {% if activity_type == 'Walking' %}🚶
+                                                                        {% elif activity_type == 'Running' %}🏃
+                                                                        {% elif activity_type == 'Cycling' %}🚲
+                                                                        {% elif activity_type == 'Swimming' %}🏊
+                                                                        {% elif activity_type == 'Gym Workout' %}🏋️
+                                                                        {% elif activity_type == 'Yoga' %}🧘
+                                                                        {% elif activity_type == 'Dancing' %}💃
+                                                                        {% elif activity_type == 'Hiking' %}🏔️
+                                                                        {% elif activity_type == 'Basketball' %}🏀
+                                                                        {% elif activity_type == 'Football' %}⚽
+                                                                        {% elif activity_type == 'Tennis' %}🎾
+                                                                        {% else %}🎯
+                                                                        {% endif %}
+                                                                    </span>
+                                                                    {{ activity_type }} <span class="text-muted"></span>
+                                                                </span>
+                                                                <span class="entry-date">{{ entry[1] }}</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Water Intake Modal -->
+    <div class="modal fade" id="waterModal" tabindex="-1" aria-labelledby="waterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">
+                        <i class="fas fa-tint text-primary me-2"></i>
+                        Su İçtim
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="quick-amounts mb-3">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <button class="btn btn-outline-primary w-100" onclick="setWaterAmount(200)">
+                                    200ml
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-primary w-100" onclick="setWaterAmount(500)">
+                                    500ml
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-primary w-100" onclick="setWaterAmount(1000)">
+                                    1L
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="waterForm" action="{{ url_for('track_water') }}" method="POST" style="display: none;">
+                        <input type="hidden" name="water_amount" id="waterAmountInput">
+                        <button type="submit" style="display: none;">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Meals Modal -->
+    <div class="modal fade" id="mealsModal" tabindex="-1" aria-labelledby="mealsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('track_meals') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="mealsModalLabel">Meals</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="mealName" class="form-label">Meal Name</label>
+                            <input type="text" class="form-control" id="mealName" name="meal_name" placeholder="Enter meal name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="calories" class="form-label">Calories</label>
+                            <input type="number" class="form-control" id="calories" name="calories" placeholder="Enter calories" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Activities Modal -->
+    <div class="modal fade" id="activitiesModal" tabindex="-1" aria-labelledby="activitiesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ url_for('track_activities') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="activitiesModalLabel">Activities</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="activityType" class="form-label">Activity Type</label>
+                            <select class="form-select" id="activityType" name="activity_type" required>
+                                <option value="">Select activity type</option>
+                                <option value="walking">Walking 🚶</option>
+                                <option value="running">Running 🏃</option>
+                                <option value="cycling">Cycling 🚲</option>
+                                <option value="swimming">Swimming 🏊</option>
+                                <option value="gym">Gym Workout 🏋️</option>
+                                <option value="yoga">Yoga 🧘</option>
+                                <option value="dancing">Dancing 💃</option>
+                                <option value="hiking">Hiking 🏔️</option>
+                                <option value="basketball">Basketball 🏀</option>
+                                <option value="football">Football ⚽</option>
+                                <option value="tennis">Tennis 🎾</option>
+                                <option value="other">Other Exercise 🎯</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="activityDuration" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="activityDuration" name="duration" placeholder="Enter duration" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="activityCalories" class="form-label">Calories Burned</label>
+                            <input type="number" class="form-control" id="activityCalories" name="calories_burned" placeholder="Enter calories burned" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Progress bar 
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 100);
+        });
+
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip);
+        });
+    });
+
+    function setWaterAmount(amount) {
+    var liters = amount / 1000;  
+
+    document.getElementById('waterAmountInput').value = liters;
+
+    document.getElementById('waterForm').submit();
+    }
+
+    </script>
+</body>
+</html>
