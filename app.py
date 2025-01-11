@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = ' '
@@ -15,19 +15,77 @@ mysql = MySQL(app)
 @app.route('/', methods=['GET'])
 def index():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM tracker_entries ORDER BY date DESC")
-    data = cur.fetchall()
-    cur.close()
+    
+    # Bugünün verileri
+    today = datetime.now().date()
+    today_start = today.strftime('%Y-%m-%d 00:00:00')
+    today_end = today.strftime('%Y-%m-%d 23:59:59')
+    
+    cur.execute("""
+        SELECT * FROM tracker_entries 
+        WHERE date BETWEEN %s AND %s 
+        ORDER BY date DESC
+    """, (today_start, today_end))
+    today_data = cur.fetchall()
+
+    # Son 7 günün verileri
+    week_start = (today - timedelta(days=6)).strftime('%Y-%m-%d 00:00:00')
+    cur.execute("""
+        SELECT date, entry_type, details 
+        FROM tracker_entries 
+        WHERE date BETWEEN %s AND %s
+    """, (week_start, today_end))
+    weekly_data = cur.fetchall()
 
     # Hedef verisi
-    cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM goals ORDER BY id DESC LIMIT 1")
     goal = cur.fetchone()
     cur.close()
 
-    goal_status = check_goals(goal, data)
+    # Haftalık istatistikleri hesapla
+    weekly_stats = process_weekly_data(weekly_data)
+    goal_status = check_goals(goal, today_data)
 
-    return render_template('index.html', data=data, goal=goal, goal_status=goal_status)
+    return render_template('index.html', 
+                         data=today_data, 
+                         goal=goal, 
+                         goal_status=goal_status,
+                         weekly_stats=weekly_stats)
+
+def process_weekly_data(weekly_data):
+    # Son 7 günün tarihlerini oluştur
+    dates = [(datetime.now().date() - timedelta(days=x)).strftime('%d/%m') 
+             for x in range(6, -1, -1)]
+    
+    stats = {
+        'dates': dates,
+        'water': [0] * 7,
+        'calories': [0] * 7,
+        'activity': [0] * 7
+    }
+    
+    for entry in weekly_data:
+        date = entry[0].strftime('%d/%m')
+        if date in dates:
+            day_index = dates.index(date)
+            entry_type = entry[1]
+            details = entry[2]
+            
+            try:
+                if entry_type == 'Water':
+                    water_amount = float(details.split()[0])
+                    stats['water'][day_index] += water_amount
+                elif entry_type == 'Meal':
+                    calories = int(details.split('-')[1].strip().split()[0])
+                    stats['calories'][day_index] += calories
+                elif entry_type == 'Activity':
+                    activity_calories = int(details.split('-')[1].strip().split()[0])
+                    stats['activity'][day_index] += activity_calories
+            except (ValueError, IndexError):
+                continue
+    
+    return stats
+
 def check_goals(goal, data):
     goal_status = {
         'water': 'green',
@@ -41,27 +99,25 @@ def check_goals(goal, data):
         'activity_total': 0
     }
 
-    if goal:
+    if goal and data:  # Hem hedef hem de bugünün verisi varsa
         try:
             water_goal = float(goal[1]) if goal[1] else 0
             meal_goal = int(goal[2]) if goal[2] else 0
             activity_goal = int(goal[3]) if goal[3] else 0
 
-            # Su hesaplamaları
+            # Sadece bugünün verilerini topla
             total_water = sum([float(entry[3].split()[0]) for entry in data if entry[2] == 'Water'])
             goal_status['water_total'] = total_water
             water_percentage = (total_water / water_goal * 100) if water_goal > 0 else 0
             goal_status['water_percentage'] = min(water_percentage, 100)
             goal_status['water'] = 'red' if total_water < water_goal else 'green'
 
-            # Yemek hesaplamaları
             total_meal = sum([int(entry[3].split('-')[1].strip().split()[0]) for entry in data if entry[2] == 'Meal'])
             goal_status['meal_total'] = total_meal
             meal_percentage = (total_meal / meal_goal * 100) if meal_goal > 0 else 0
             goal_status['meal_percentage'] = min(meal_percentage, 100)
             goal_status['meal'] = 'red' if total_meal > meal_goal else 'green'
 
-            # Aktivite hesaplamaları
             total_activity = sum([int(entry[3].split('-')[1].strip().split()[0]) for entry in data if entry[2] == 'Activity'])
             goal_status['activity_total'] = total_activity
             activity_percentage = (total_activity / activity_goal * 100) if activity_goal > 0 else 0

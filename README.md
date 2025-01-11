@@ -9,6 +9,16 @@ Health Tracker is a web application that allows users to track their daily healt
 - **Activity Goal**: Track the number of calories burned and the activities performed.
 - **Goal Progress**: Display the percentage of completion for each goal.
 - **Personal Motivation**: Display motivational messages to encourage users.
+- **Daily and Weekly Updates**: The app updates each user's progress daily and tracks the weekly performance in a statistical graph.
+- **Statistical Graphs**: Display daily and weekly health data in visually appealing statistical charts.
+
+## Screenshots
+
+### 1. Dashboard Overview (Top view showing water intake, calories burned, etc.)
+![Dashboard Overview](static/img/web1.png)
+
+### 2. Statistical Graphs (Graph displaying weekly progress)
+![Statistical Graphs](static/img/statistic.png)
 
 ## Technologies
 
@@ -31,4 +41,4 @@ You can clone this project to your local machine and run it in your local enviro
 1. Clone this project from GitHub:
 
    ```bash
-   git clone origin https://github.com/Asliikl/Health-Tracker.git
+   git clone https://github.com/Asliikl/Health-Tracker.git

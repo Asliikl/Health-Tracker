@@ -10,23 +10,6 @@
     
 <body>
 
-    <div class="page-header">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="display-4">Health Tracker</h1>
-                    <p class="lead">Track your daily health goals and stay motivated!</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    {% if goal %}
-                        <div class="achievement-badge">
-                            <i class="fas fa-trophy"></i> {{ goal_status['streak_days'] }} Day Streak
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
 
     {% if goal %}
     <div class="container-fluid">
@@ -46,15 +29,49 @@
                         {% else %}
                             "You're almost there! You're doing amazing! 🎯"
                         {% endif %}
-                    </p>                    
-                </div>
-                <div class="col-auto">
-                    <div class="h2 mb-0">{{ "%.0f"|format(total_percentage) }}%</div>
+                    </p>
+                    <div class="progress mt-2" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ total_percentage }}%;" 
+                             aria-valuenow="{{ total_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ "%.0f"|format(total_percentage) }}%
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
+
+    <div class="card mt-4 mb-4" style="margin: 1.5rem;">
+        <div class="card-header stats-header" role="button" data-bs-toggle="collapse" data-bs-target="#statsCollapse" aria-expanded="false" style="background: #FEF9F2; color: #333;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-chart-line me-3" style="font-size: 1.2rem;"></i>
+                <h5 class="mb-0">View Weekly Statistics</h5>
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </div>
+        </div>
+        <div class="collapse" id="statsCollapse">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <h6 class="text-center mb-3">Water Intake</h6>
+                        <canvas id="waterChart"></canvas>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <h6 class="text-center mb-3">Calorie Intake</h6>
+                        <canvas id="caloriesChart"></canvas>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <h6 class="text-center mb-3">Activity</h6>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid mt-4 ">
         <div class="row">
@@ -75,7 +92,10 @@
                         "Set your goals and start your journey! 🎯"
                      {% endif %}
                 </p>
-                <a href="{{ url_for('set_goal') }}" class="btn btn-success btn-sm mb-3 w-100">Set Your Goals</a>
+                <a href="{{ url_for('set_goal') }}" class="btn btn-success btn-sm mb-3 w-100">
+                    <i class="fas fa-trophy me-2"></i>
+                    Set Your Daily Goals
+                </a>
 
                 {% if goal %}
                     <div class="card goal-card mb-2 {% if goal_status['water_percentage'] < 100 %}incomplete{% elif goal_status['water_percentage'] == 100 %}complete{% else %}exceeded{% endif %}">
@@ -462,6 +482,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Progress bar 
@@ -477,6 +498,81 @@
         const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         tooltips.forEach(tooltip => {
             new bootstrap.Tooltip(tooltip);
+        });
+
+        // Su grafiği
+        new Chart(document.getElementById('waterChart'), {
+            type: 'line',
+            data: {
+                labels: {{ weekly_stats.dates|tojson }},
+                datasets: [{
+                    label: 'Su Tüketimi (L)',
+                    data: {{ weekly_stats.water|tojson }},
+                    borderColor: '#B3C8CF',
+                    backgroundColor: 'rgba(179, 200, 207, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Haftalık Su Tüketimi'
+                    }
+                }
+            }
+        });
+
+        // Kalori grafiği
+        new Chart(document.getElementById('caloriesChart'), {
+            type: 'line',
+            data: {
+                labels: {{ weekly_stats.dates|tojson }},
+                datasets: [{
+                    label: 'Kalori Alımı',
+                    data: {{ weekly_stats.calories|tojson }},
+                    borderColor: '#C9E9D2',
+                    backgroundColor: 'rgba(201, 233, 210, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Haftalık Kalori Alımı'
+                    }
+                }
+            }
+        });
+
+        // Aktivite grafiği
+        new Chart(document.getElementById('activityChart'), {
+            type: 'line',
+            data: {
+                labels: {{ weekly_stats.dates|tojson }},
+                datasets: [{
+                    label: 'Yakılan Kalori',
+                    data: {{ weekly_stats.activity|tojson }},
+                    borderColor: '#FFE3E3',
+                    backgroundColor: 'rgba(255, 227, 227, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Haftalık Aktivite'
+                    }
+                }
+            }
         });
     });
 
